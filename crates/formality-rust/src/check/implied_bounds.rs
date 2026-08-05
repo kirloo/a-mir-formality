@@ -48,7 +48,7 @@ judgment_fn! {
         (
             (if let Some(Parameter::Lt(lt)) = parameters.get(0))
             (if let Some(inner) = parameters.get(1))
-            (let wc = vec![WhereClause::Outlives((*inner).clone(), (**lt).clone())])
+            (let wc = vec![WhereClause::outlives(inner, lt)])
             (implied_bounds_from_params(vec![inner]) => inner_wcs)
             ------------------------------------------------------------ ("inner ref")
             (implied_bounds_from_ty(RigidTy { name: RigidName::Ref(_), parameters }, ) => (inner_wcs, wc))
