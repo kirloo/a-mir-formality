@@ -46,8 +46,7 @@ judgment_fn! {
         debug(ty)
 
         (
-            (if let Some(Parameter::Lt(lt)) = parameters.get(0))
-            (if let Some(inner) = parameters.get(1))
+            (if let [Parameter::Lt(lt), inner] = &parameters[..])
             (let wc = vec![WhereClause::outlives(inner, lt)])
             (implied_bounds_from_params(vec![inner]) => inner_wcs)
             ------------------------------------------------------------ ("inner ref")
