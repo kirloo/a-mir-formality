@@ -25,7 +25,7 @@ judgment_fn! {
         debug(tys)
 
         (
-            (implied_bounds_from_ty(arg.ty.clone()) => head_wcs)
+            (implied_bounds_from_ty(&arg.ty)) => head_wcs)
             (implied_bounds_from_args(tail) => tail_wcs)
             ------------------------------------------------------------ ("recurse args")
             (implied_bounds_from_args(Cons(arg, tail)) => (head_wcs, tail_wcs))
