@@ -146,8 +146,13 @@ impl<T: Debug> AnyhowResultTestExt<T> for anyhow::Result<T> {
     }
 }
 
+/// Record negative coverage for an error, if it carries a [`FailedJudgment`].
+///
+/// Callers that assert on a failure without going through
+/// [`AnyhowResultTestExt::assert_err_leaves`] should call this so the failure
+/// still counts towards negative coverage.
 #[track_caller]
-fn record_negative_coverage_from_anyhow(e: &anyhow::Error) {
+pub fn record_negative_coverage_from_anyhow(e: &anyhow::Error) {
     if let Some(failed) = e.downcast_ref::<Box<FailedJudgment>>() {
         crate::judgment::coverage::record_negative_coverage(std::iter::once(failed.as_ref()));
     } else if let Some(failed) = e.downcast_ref::<FailedJudgment>() {

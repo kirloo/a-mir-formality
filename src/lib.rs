@@ -3,12 +3,12 @@ use std::{path::PathBuf, sync::Arc};
 use clap::Parser;
 use formality_core::judgment::ProofTree;
 use formality_rust::check::check_all_crates;
-use formality_rust::grammar::Crates;
+use formality_rust::grammar::{CrateItem, Crates, FeatureGate, FeatureGateName};
 use formality_rust::prove::{test_util::TestAssertion, Constraints};
 use formality_rust::rust::try_term;
 
 pub mod test_util;
-pub use test_util::FormalityTest;
+pub use test_util::{BorrowCheckFailure, FormalityTest};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -46,6 +46,22 @@ pub fn main() -> anyhow::Result<()> {
 
 pub fn test_program_ok(input: &str) -> anyhow::Result<ProofTree> {
     let program: Crates = try_term(input)?;
+    let proof_tree = check_all_crates(&program).check_proven()?;
+    Ok(proof_tree)
+}
+
+pub fn test_program_ok_with_feature_gates(
+    input: &str,
+    feature_gates: Vec<FeatureGateName>,
+) -> anyhow::Result<ProofTree> {
+    let mut program: Crates = try_term(input)?;
+    for krate in program.crates.iter_mut() {
+        krate.items = feature_gates
+            .iter()
+            .map(|fg| CrateItem::FeatureGate(FeatureGate { name: *fg }))
+            .chain(krate.items.clone())
+            .collect();
+    }
     let proof_tree = check_all_crates(&program).check_proven()?;
     Ok(proof_tree)
 }
