@@ -383,6 +383,37 @@ fn basic_neg_impl_dup() {
 }
 
 #[test]
+fn impl_items_with_duplicate_fn_names() {
+    FormalityTest::new(crates![crate core {
+        trait Foo {
+            fn bar(self_: u32) -> u32;
+        }
+        struct MyStruct {}
+        impl Foo for MyStruct {
+            fn bar(self_: u32) -> u32 { trusted }
+            fn bar(x: u32) -> u32 { trusted }
+        }
+    }])
+    .err(expect_test::expect![[r#"
+        the rule "check_trait_impl" at (impls.rs) failed because
+          function item bar is defined multiple times"#]]);
+
+    FormalityTest::new(crates![crate core {
+        trait Foo {
+            type Assoc : [];
+        }
+        struct MyStruct {}
+        impl Foo for MyStruct {
+            type Assoc = u32;
+            type Assoc = u64;
+        }
+    }])
+    .err(expect_test::expect![[r#"
+        the rule "check_trait_impl" at (impls.rs) failed because
+          assoc ty Assoc is defined multiple times"#]]);
+}
+
+#[test]
 fn impl_missing_required_fn() {
     FormalityTest::new(crates![crate core {
         trait Foo {

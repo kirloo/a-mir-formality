@@ -137,12 +137,12 @@ fn check_duplicate_impl_items(impl_items: &[ImplItem]) -> Fallible<ProofTree> {
         match impl_item {
             ImplItem::AssociatedTyValue(AssociatedTyValue { id, .. }) => {
                 if !types.insert(id) {
-                    bail!("Assoc ty {id:?} defined multiple times");
+                    bail!("assoc ty {id:?} is defined multiple times");
                 }
             }
             ImplItem::Fn(fun) => {
                 if !functions.insert(&fun.id) {
-                    bail!("Function item {:?} defined multiple times", &fun.id);
+                    bail!("function item {:?} is defined multiple times", &fun.id);
                 }
             }
         }
