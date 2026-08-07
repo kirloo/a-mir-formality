@@ -1,4 +1,5 @@
 use anyhow::bail;
+use formality_core::Set;
 
 use crate::grammar::{
     AdtId, AssociatedTy, AssociatedTyBoundData, AssociatedTyValue, AssociatedTyValueBoundData,
@@ -31,6 +32,7 @@ judgment_fn! {
             (let TraitBoundData { where_clauses: _, trait_items } = trait_decl.binder.instantiate_with(&trait_ref.parameters)?)
             (check_safety_matches(&trait_decl, &trait_impl) => ())
 
+            (check_duplicate_impl_items(impl_items) => ())
             (for_all(impl_item in impl_items)
                 (check_trait_impl_item(program, env, where_clauses, trait_items, impl_item, crate_id) => ()))
 
@@ -125,6 +127,27 @@ fn check_all_required_items_present(
         }
     }
     Ok(ProofTree::leaf("check_all_required_items_present"))
+}
+
+fn check_duplicate_impl_items(impl_items: &[ImplItem]) -> Fallible<ProofTree> {
+    let mut functions = Set::new();
+    let mut types = Set::new();
+
+    for impl_item in impl_items {
+        match impl_item {
+            ImplItem::AssociatedTyValue(AssociatedTyValue { id, .. }) => {
+                if !types.insert(id) {
+                    bail!("Assoc ty {id:?} defined multiple times");
+                }
+            }
+            ImplItem::Fn(fun) => {
+                if !functions.insert(&fun.id) {
+                    bail!("Function item {:?} defined multiple times", &fun.id);
+                }
+            }
+        }
+    }
+    Ok(ProofTree::leaf("check_duplicate_impl_items"))
 }
 
 judgment_fn! {
