@@ -4122,10 +4122,8 @@ fn issue_63908_remove_last_node_iterative() {
                 outlived_by_loan = {?lt_2, ?lt_3}
                 &lifetime.upcast() = ?lt_2
 
-        the rule "write-indirect" at (nll.rs) failed because
-          condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
-            place_accessed = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-            place_loaned_ref = cursor : &?lt_2 mut List
+            the rule "write-indirect" at (nll.rs) failed because
+              pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `cursor`
 
             the rule "write-indirect" at (nll.rs) failed because
               condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`

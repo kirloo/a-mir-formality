@@ -293,7 +293,7 @@ fn test_let_with_ill_formed_type() {
         error[E0277]: the trait bound `S1: Trait1` is not satisfied
           --> lib.rs
            |
-        13 |     let mut s2: S2<S1>;
+        10 |     let mut s2: S2<S1>;
            |                 ^^^^^^ unsatisfied trait bound
            |
         help: the trait `Trait1` is not implemented for `S1`
@@ -304,16 +304,13 @@ fn test_let_with_ill_formed_type() {
         help: this trait has no implementations, consider adding one
           --> lib.rs
            |
-         1 | pub trait Trait1 {}
+         1 | pub trait Trait1 { }
            | ^^^^^^^^^^^^^^^^
         note: required by a bound in `S2`
           --> lib.rs
            |
-         5 | pub struct S2<T00>
-           |            -- required by a bound in this struct
-         6 | where
-         7 |     T00: Trait1,
-           |          ^^^^^^ required by this bound in `S2`
+         5 | pub struct S2<T00> where T00: Trait1 {
+           |                               ^^^^^^ required by this bound in `S2`
 
         For more information about this error, try `rustc --explain E0277`.
         error: could not compile `Foo` (lib) due to 1 previous error
