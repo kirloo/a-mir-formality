@@ -2216,21 +2216,8 @@ fn min_problem_case_3() {
             the rule "write-indirect" at (nll.rs) failed because
               condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
                 place_accessed = *(m : &!lt_1 mut Map) : <&!lt_1 mut Map as Derefable>::Target
-                place_loaned_ref = m : &!lt_1 mut Map"#]]);
-
-    FormalityTest::new(feature_gate_program(
-        POLONIUS_ALPHA_GATE,
-        MIN_PROBLEM_CASE_3,
-    ))
-    .skip_execute()
-    .ok();
-
-    FormalityTest::new(feature_gate_program(
-        POLONIUS_UNLOCKED_GATE,
-        MIN_PROBLEM_CASE_3,
-    ))
-    .skip_execute()
-    .ok();
+                place_loaned_ref = m : &!lt_1 mut Map"#]],
+    );
 }
 
 /// Test that dropping a borrowed variable is an error.
@@ -2426,60 +2413,60 @@ fn too_min_problem_case_3() {
 #[formality_core::test]
 fn undeclared_universal_region_relationship() {
     FormalityTest::new(crates![crate Foo {
-                fn foo<'a, 'b>(v1: &'a u32) -> &'b u32 {
-                    exists<'r0> {
-                        let v2: &'r0 u32 = v1;
-                        return v2;
-                    }
-                }
-            }]).err(expect_test::expect![[r#"
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: @ wf(?lt_2), assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        fn foo<'a, 'b>(v1: &'a u32) -> &'b u32 {
+            exists<'r0> {
+                let v2: &'r0 u32 = v1;
+                return v2;
+            }
+        }
+    }]).borrowck_err(BorrowCheckFailure::All, expect_test::expect![[r#"
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: @ wf(?lt_2), assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: @ wf(?lt_2), assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: @ wf(?lt_2), assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1, @ wf(?lt_2)}, env: Env { variables: [!lt_0, !lt_1, ?lt_2], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_2, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_2, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_2, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_2, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_2, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_0, !lt_2, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_2, b: !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_2, b: !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: @ wf(?lt_1), assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_2 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_2, b: !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_2, b: !lt_0, assumptions: {u32 : !lt_0, @ wf(?lt_1)}, env: Env { variables: [!lt_2, !lt_0, ?lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_2, via: @ wf(?lt_0), assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_2, via: @ wf(?lt_0), assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_2, assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_2, assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_2, via: @ wf(?lt_0), assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_2, via: @ wf(?lt_0), assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_2, assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }"#]])
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_2, assumptions: {@ wf(?lt_0)}, env: Env { variables: [!lt_1, !lt_2, ?lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }"#]])
 }
 
 /// Same as `undeclared_universal_region_relationship`, but the function
@@ -2488,76 +2475,76 @@ fn undeclared_universal_region_relationship() {
 #[formality_core::test]
 fn undeclared_universal_region_relationship_no_return() {
     FormalityTest::new(crates![crate Foo {
-                fn foo<'a, 'b>(v1: &'a u32, v2: &'b u32) -> () {
-                    let output: &'b u32 = v2;
-                    loop {
-                        output = v1;
-                    }
-                }
-            }]).err(expect_test::expect![[r#"
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        fn foo<'a, 'b>(v1: &'a u32, v2: &'b u32) -> () {
+            let output: &'b u32 = v2;
+            loop {
+                output = v1;
+            }
+        }
+    }]).borrowck_err(BorrowCheckFailure::All, expect_test::expect![[r#"
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }"#]])
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }"#]])
 }
 
 /// Upcasting from `'a` to `'b` is allowed because
@@ -3197,18 +3184,8 @@ fn if_false_borrowck() {
             the rule "write-indirect" at (nll.rs) failed because
               condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
                 place_accessed = *(m : &!lt_1 mut Map) : <&!lt_1 mut Map as Derefable>::Target
-                place_loaned_ref = m : &!lt_1 mut Map"#]]);
-
-    FormalityTest::new(feature_gate_program(POLONIUS_ALPHA_GATE, IF_FALSE_BORROWCK))
-        .skip_execute()
-        .ok();
-
-    FormalityTest::new(feature_gate_program(
-        POLONIUS_UNLOCKED_GATE,
-        IF_FALSE_BORROWCK,
-    ))
-    .skip_execute()
-    .ok();
+                place_loaned_ref = m : &!lt_1 mut Map"#]],
+    );
 }
 
 /// Writing to a borrowed variable before a loop that might not execute
@@ -3354,42 +3331,42 @@ fn call_generic_fn_with_turbofish_missing_relation_upcast() {
             return v1;
         }
 
-                fn foo<'a, 'b>(a: &'a u32) -> &'b u32 {
-                    let r: &'b u32 = identity::<&'b u32>(a);
-                    return r;
-                }
-            }]).err(expect_test::expect![[r#"
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        fn foo<'a, 'b>(a: &'a u32) -> &'b u32 {
+            let r: &'b u32 = identity::<&'b u32>(a);
+            return r;
+        }
+    }]).borrowck_err(BorrowCheckFailure::All, expect_test::expect![[r#"
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0, u32 : !lt_1}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_1 : !lt_0, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_1, b: !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_1, !lt_0], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
-                crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }"#]])
+        crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }"#]])
 }
 
 /// Test call to a generic function using turbofish syntax with lifetime and type.
@@ -3659,54 +3636,41 @@ fn outlive_before_return_does_not_affect_merged_paths() {
             the rule "write-indirect" at (nll.rs) failed because
               pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `a`
 
-        the rule "write-indirect" at (nll.rs) failed because
-          condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
-            place_accessed = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
-            place_loaned_ref = a : &!lt_1 mut u8
+            the rule "write-indirect" at (nll.rs) failed because
+              condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
+                place_accessed = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
+                place_loaned_ref = a : &!lt_1 mut u8
 
-        the rule "borrow of disjoint places" at (nll.rs) failed because
-          condition evaluated to false: `place_disjoint_from_place(&loan.place, &access.place)`
-            &loan.place = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
-            &access.place = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
+            the rule "borrow of disjoint places" at (nll.rs) failed because
+              condition evaluated to false: `place_disjoint_from_place(&loan.place, &access.place)`
+                &loan.place = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
+                &access.place = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
 
-        the rule "loan_cannot_outlive" at (nll.rs) failed because
-          condition evaluated to false: `!outlived_by_loan.contains(&lifetime.upcast())`
-            outlived_by_loan = {!lt_1, ?lt_2, ?lt_3, ?lt_4, ?lt_5}
-            &lifetime.upcast() = !lt_1
+            the rule "loan_cannot_outlive" at (nll.rs) failed because
+              condition evaluated to false: `!outlived_by_loan.contains(&lifetime.upcast())`
+                outlived_by_loan = {!lt_1, ?lt_2, ?lt_3, ?lt_4, ?lt_5}
+                &lifetime.upcast() = !lt_1
 
-        the rule "loan_not_required_by_universal_regions" at (nll.rs) failed because
-          condition evaluated to false: `outlived_by_loan.iter().all(|p| match p
-          {
-              Parameter::Ty(_) => false, Parameter::Lt(lt) => match lt.as_ref()
+            the rule "loan_not_required_by_universal_regions" at (nll.rs) failed because
+              condition evaluated to false: `outlived_by_loan.iter().all(|p| match p
               {
-                  Lt::Static => false, Lt::Variable(Variable::UniversalVar(_)) => false,
-                  Lt::Variable(Variable::ExistentialVar(_)) => true,
-                  Lt::Variable(Variable::BoundVar(_)) =>
-                  panic!("cannot outlive a bound var"), Lt::Erased => true,
-              }, Parameter::Const(_) => panic!("cannot outlive a constant"),
-          })`
+                  Parameter::Ty(_) => false, Parameter::Lt(lt) => match lt.as_ref()
+                  {
+                      Lt::Static => false, Lt::Variable(Variable::UniversalVar(_)) => false,
+                      Lt::Variable(Variable::ExistentialVar(_)) => true,
+                      Lt::Variable(Variable::BoundVar(_)) =>
+                      panic!("cannot outlive a bound var"), Lt::Erased => true,
+                  }, Parameter::Const(_) => panic!("cannot outlive a constant"),
+              })`
 
-        the rule "write-indirect" at (nll.rs) failed because
-          pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `a`
+            the rule "write-indirect" at (nll.rs) failed because
+              pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `a`
 
-        the rule "write-indirect" at (nll.rs) failed because
-          condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
-            place_accessed = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
-            place_loaned_ref = a : &!lt_1 mut u8"#]]);
-
-    FormalityTest::new(feature_gate_program(
-        POLONIUS_ALPHA_GATE,
-        OUTLIVE_BEFORE_RETURN_DOES_NOT_AFFECT_MERGED_PATHS,
-    ))
-    .skip_execute()
-    .ok();
-
-    FormalityTest::new(feature_gate_program(
-        POLONIUS_UNLOCKED_GATE,
-        OUTLIVE_BEFORE_RETURN_DOES_NOT_AFFECT_MERGED_PATHS,
-    ))
-    .skip_execute()
-    .ok();
+            the rule "write-indirect" at (nll.rs) failed because
+              condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
+                place_accessed = *(a : &!lt_1 mut u8) : <&!lt_1 mut u8 as Derefable>::Target
+                place_loaned_ref = a : &!lt_1 mut u8"#]],
+    );
 }
 
 // Divergent paths (aka return) should not propagate outlives, liveness
@@ -3963,7 +3927,7 @@ fn reborrow_requires_ref_outlives_loan() {
         }
     }])
     .skip_execute()
-    .err(expect_test::expect![[r#"
+    .borrowck_err(BorrowCheckFailure::All, expect_test::expect![[r#"
         crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: !lt_0 : !lt_1, via: u32 : !lt_0, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
 
         crates/formality-rust/src/prove/prove_outlives.rs:8:1: no applicable rules for prove_outlives { a: !lt_0, b: !lt_1, assumptions: {u32 : !lt_0}, env: Env { variables: [!lt_0, !lt_1], bias: Soundness, pending: [], allow_pending_outlives: false } }
@@ -4163,74 +4127,28 @@ fn issue_63908_remove_last_node_iterative() {
             place_accessed = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
             place_loaned_ref = cursor : &?lt_2 mut List
 
-        the rule "borrow of disjoint places" at (nll.rs) failed because
-          condition evaluated to false: `place_disjoint_from_place(&loan.place, &access.place)`
-            &loan.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-            &access.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
+            the rule "write-indirect" at (nll.rs) failed because
+              condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
+                place_accessed = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
+                place_loaned_ref = cursor : &?lt_2 mut List
 
-        the rule "loan_cannot_outlive" at (nll.rs) failed because
-          condition evaluated to false: `!outlived_by_loan.contains(&lifetime.upcast())`
-            outlived_by_loan = {?lt_2, ?lt_3}
-            &lifetime.upcast() = ?lt_2
+            the rule "borrow of disjoint places" at (nll.rs) failed because
+              condition evaluated to false: `place_disjoint_from_place(&loan.place, &access.place)`
+                &loan.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
+                &access.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
 
-        the rule "write-indirect" at (nll.rs) failed because
-          pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `cursor`
+            the rule "loan_cannot_outlive" at (nll.rs) failed because
+              condition evaluated to false: `!outlived_by_loan.contains(&lifetime.upcast())`
+                outlived_by_loan = {?lt_2, ?lt_3}
+                &lifetime.upcast() = ?lt_2
 
-        the rule "write-indirect" at (nll.rs) failed because
-          condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
-            place_accessed = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-            place_loaned_ref = cursor : &?lt_2 mut List"#]]);
+            the rule "write-indirect" at (nll.rs) failed because
+              pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `cursor`
 
-    // [polonius]: rustc errors here (known-bug #63908), same as [nll].
-    FormalityTest::new(feature_gate_program(
-        POLONIUS_ALPHA_GATE,
-        ISSUE_63908_REMOVE_LAST_NODE_ITERATIVE,
-    ))
-    .skip_execute()
-    .err(expect_test::expect![[r#"
-        the rule "borrow of disjoint places" at (nll.rs) failed because
-          condition evaluated to false: `place_disjoint_from_place(&loan.place, &access.place)`
-            &loan.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-            &access.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-
-        the rule "loan_cannot_outlive" at (nll.rs) failed because
-          condition evaluated to false: `!outlived_by_loan.contains(&lifetime.upcast())`
-            outlived_by_loan = {?lt_2, ?lt_3}
-            &lifetime.upcast() = ?lt_2
-
-        the rule "write-indirect" at (nll.rs) failed because
-          pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `cursor`
-
-        the rule "write-indirect" at (nll.rs) failed because
-          condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
-            place_accessed = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-            place_loaned_ref = cursor : &?lt_2 mut List
-
-        the rule "borrow of disjoint places" at (nll.rs) failed because
-          condition evaluated to false: `place_disjoint_from_place(&loan.place, &access.place)`
-            &loan.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-            &access.place = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-
-        the rule "loan_cannot_outlive" at (nll.rs) failed because
-          condition evaluated to false: `!outlived_by_loan.contains(&lifetime.upcast())`
-            outlived_by_loan = {?lt_2, ?lt_3}
-            &lifetime.upcast() = ?lt_2
-
-        the rule "write-indirect" at (nll.rs) failed because
-          pattern `TypedPlaceExpressionData::Deref(place_loaned_ref)` did not match value `cursor`
-
-        the rule "write-indirect" at (nll.rs) failed because
-          condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
-            place_accessed = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
-            place_loaned_ref = cursor : &?lt_2 mut List"#]]);
-
-    // [legacy]: rustc passes.
-    FormalityTest::new(feature_gate_program(
-        POLONIUS_UNLOCKED_GATE,
-        ISSUE_63908_REMOVE_LAST_NODE_ITERATIVE,
-    ))
-    .skip_execute()
-    .ok();
+            the rule "write-indirect" at (nll.rs) failed because
+              condition evaluated to false: `place_accessed.is_prefix_of(place_loaned_ref)`
+                place_accessed = *(cursor : &?lt_2 mut List) : <&?lt_2 mut List as Derefable>::Target
+                place_loaned_ref = cursor : &?lt_2 mut List"#]]);
 }
 
 /// Port of `tests/ui/nll/polonius/iterating-updating-cursor-issue-57165.rs`
