@@ -61,6 +61,10 @@ judgment_fn! {
             (let trait_ref = trait_id.with(self_ty, trait_parameters))
             (super::where_clauses::prove_where_clauses_well_formed(program, &env, &where_clauses, &where_clauses) => ())
             (super::prove_goal(program, &env, &where_clauses, Predicate::not_implemented(&trait_ref)) => ())
+
+            (let trait_decl = program.program().trait_named(&trait_ref.trait_id)?)
+            (let TraitBoundData { where_clauses: _, trait_items: _ } = trait_decl.binder.instantiate_with(&trait_ref.parameters)?)
+
             ---- ("check_neg_trait_impl")
             (check_neg_trait_impl(program, NegTraitImpl { binder, safety: Safety::Safe }) => ())
         )
