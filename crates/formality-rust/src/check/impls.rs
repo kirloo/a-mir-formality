@@ -3,8 +3,8 @@ use anyhow::bail;
 use crate::grammar::{
     AdtId, AssociatedTy, AssociatedTyBoundData, AssociatedTyValue, AssociatedTyValueBoundData,
     Binder, CrateId, Fallible, Fn, FnBoundData, ImplItem, MaybeFnBody, NegTraitImpl,
-    NegTraitImplBoundData, Predicate, Relation, RigidName, Substitution, Trait, TraitBoundData,
-    TraitImpl, TraitImplBoundData, TraitItem, Ty, Wcs,
+    NegTraitImplBoundData, Predicate, RigidName, Substitution, Trait, TraitBoundData, TraitImpl,
+    TraitImplBoundData, TraitItem, Ty, Wcs,
 };
 use crate::prove::{Env, Program, Safety};
 use crate::rust::Term;
@@ -182,10 +182,10 @@ judgment_fn! {
             // Check each argument: trait arg is subtype of impl arg (contravariance)
             (for_all(pair in ii_input_args.iter().zip(ti_input_args.iter()))
                 (let (ii_input_arg, ti_input_arg) = pair)
-                (super::prove_goal(program, &env, (&impl_assumptions, &ii_where_clauses), Relation::sub(&ti_input_arg.ty, &ii_input_arg.ty)) => ()))
+                (super::prove_goal(program, &env, (&impl_assumptions, &ii_where_clauses), Predicate::sub(&ti_input_arg.ty, &ii_input_arg.ty)) => ()))
 
             // Check return type: impl return is subtype of trait return (covariance)
-            (super::prove_goal(program, &env, (&impl_assumptions, &ii_where_clauses), Relation::sub(ii_output_ty, ti_output_ty)) => ())
+            (super::prove_goal(program, &env, (&impl_assumptions, &ii_where_clauses), Predicate::sub(ii_output_ty, ti_output_ty)) => ())
 
             ---- ("check_fn_in_impl")
             (check_fn_in_impl(program, env, impl_assumptions, trait_items, ii_fn, crate_id) => ())
@@ -223,7 +223,7 @@ judgment_fn! {
             (super::prove_goal(program, &env, (&impl_assumptions, &ti_where_clauses), &ii_where_clauses) => ())
 
             // Prove the impl type is well-formed
-            (super::prove_goal(program, env, (impl_assumptions, ii_where_clauses), Relation::well_formed(ii_ty)) => ())
+            (super::prove_goal(program, env, (impl_assumptions, ii_where_clauses), Predicate::well_formed(ii_ty)) => ())
 
             // Prove the ensures clauses
             (let ensures: Wcs = ti_ensures.iter().map(|e| e.to_wc(&ii_ty)).collect())

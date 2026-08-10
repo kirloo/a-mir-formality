@@ -9,8 +9,8 @@ use crate::check::feature_gate_enabled_in_program;
 use crate::grammar::expr::{Block, Expr, Init, Literal, PlaceExpr, Stmt};
 use crate::grammar::{
     AliasName, AliasTy, AssociatedItemId, ExistentialVar, FeatureGateName, FieldName, Fn, Lt,
-    Parameter, Predicate, RefKind, Relation, RigidName, RigidTy, ScalarId, Struct, StructBoundData,
-    TraitId, TraitRef, Ty, Variable, VariantId, Wcs, WhereClause,
+    Parameter, Predicate, RefKind, RigidName, RigidTy, ScalarId, Struct, StructBoundData, TraitId,
+    TraitRef, Ty, Variable, VariantId, Wcs, WhereClause,
 };
 use crate::grammar::{FnBoundData, PredicateTy};
 use crate::prove::Safety;
@@ -23,7 +23,7 @@ use crate::check::borrow_check::liveness::{Assignment, Either, LiveBefore, LiveP
 fn wf_assumptions_for_existential_subst(subst: &[ExistentialVar]) -> Wcs {
     subst
         .iter()
-        .map(|v| Relation::well_formed(v.clone()))
+        .map(|v| Predicate::well_formed(v.clone()))
         .collect()
 }
 
@@ -1096,7 +1096,7 @@ fn prove_sub_type(
     a: impl Upcast<Parameter>,
     b: impl Upcast<Parameter>,
 ) -> ProvenSet<FlowState> {
-    TypeckEnv::prove_goal(env, assumptions, state, Relation::sub(a, b))
+    TypeckEnv::prove_goal(env, assumptions, state, Predicate::sub(a, b))
 }
 
 fn prove_where_clauses(
@@ -1114,7 +1114,7 @@ fn prove_ty_is_wf(
     state: &FlowState,
     ty: &Ty,
 ) -> ProvenSet<FlowState> {
-    TypeckEnv::prove_goal(env, assumptions, state, Relation::well_formed(ty))
+    TypeckEnv::prove_goal(env, assumptions, state, Predicate::well_formed(ty))
 }
 
 fn prove_normalize_ty(

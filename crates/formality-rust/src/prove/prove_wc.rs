@@ -1,4 +1,4 @@
-use crate::grammar::{Predicate, Relation, Wc, Wcs};
+use crate::grammar::{Predicate, Wc, Wcs};
 use formality_core::judgment_fn;
 
 use crate::prove::{
@@ -46,14 +46,8 @@ judgment_fn! {
         (
             (a in assumptions)!
             (prove_via(decls, env, assumptions, a, goal) => c)
-            ----------------------------- ("assumption - predicate")
+            ----------------------------- ("assumption")
             (prove_wc(decls, env, assumptions, Wc::Predicate(goal)) => c)
-        )
-        (
-            (a in assumptions)!
-            (prove_via(decls, env, assumptions, a, goal) => c)
-            ----------------------------- ("assumption - relation")
-            (prove_wc(decls, env, assumptions, Wc::Relation(goal)) => c)
         )
 
 
@@ -124,13 +118,13 @@ judgment_fn! {
         (
             (prove_eq(decls, env, assumptions, a, b) => c)
             ----------------------------- ("eq")
-            (prove_wc(decls, env, assumptions, Relation::Equals(a, b)) => c)
+            (prove_wc(decls, env, assumptions, Predicate::Equals(a, b)) => c)
         )
 
         (
             (prove_sub(decls, env, assumptions, a, b) => c)
             ----------------------------- ("subtype")
-            (prove_wc(decls, env, assumptions, Wc::Relation(Relation::Sub(a, b))) => c)
+            (prove_wc(decls, env, assumptions, Predicate::Sub(a, b)) => c)
         )
 
         (
@@ -151,19 +145,19 @@ judgment_fn! {
         (
             (prove_outlives(decls, env, assumptions, a, b) => c)
             ----------------------------- ("outlives")
-            (prove_wc(decls, env, assumptions, Relation::Outlives(a, b)) => c)
+            (prove_wc(decls, env, assumptions, Predicate::Outlives(a, b)) => c)
         )
 
 
         (
             (prove_wf(decls, env, assumptions, p) => c)
             ----------------------------- ("parameter well formed")
-            (prove_wc(decls, env, assumptions, Relation::WellFormed(p)) => c)
+            (prove_wc(decls, env, assumptions, Predicate::WellFormed(p)) => c)
         )
 
         (
             (prove_const_has_type(decls, env, assumptions, constant) => (ty_constant, c))
-            (prove_after(decls, c, assumptions, Relation::equals(ty_constant, ty)) => c)
+            (prove_after(decls, c, assumptions, Predicate::equals(ty_constant, ty)) => c)
             ----------------------------- ("const has ty")
             (prove_wc(decls, env, assumptions, Predicate::ConstHasType(constant, ty)) => c)
         )

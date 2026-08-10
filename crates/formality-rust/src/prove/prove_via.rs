@@ -26,6 +26,7 @@ judgment_fn! {
             (let (skel_c, parameters_c) = pred_1.debone())
             // `g` = "goal, the name for something that we are trying to prove.
             (let (skel_g, parameters_g) = pred_2.debone())
+            (if !skel_c.is_relation())
             (if skel_c == skel_g)!
             (prove(decls, env, assumptions, Wcs::all_eq(parameters_c, parameters_g)) => c)
             ----------------------------- ("predicate-congruence-axiom")
@@ -35,10 +36,11 @@ judgment_fn! {
         (
             (let (skel_c, parameters_c) = rel_1.debone())
             (let (skel_g, parameters_g) = rel_2.debone())
+            (if skel_c.is_relation())
             (if skel_c == skel_g)
             (if parameters_c == parameters_g)! // for relations, we require 100% match
             ----------------------------- ("relation-axiom")
-            (prove_via(_decls, env, _assumptions, Wc::Relation(rel_1), Wc::Relation(rel_2)) => Constraints::none(env))
+            (prove_via(_decls, env, _assumptions, Wc::Predicate(rel_1), Wc::Predicate(rel_2)) => Constraints::none(env))
         )
 
         // If you have `where for<'a> T: Trait<'a>` then you can prove `T: Trait<'b>` for any `'b`.
