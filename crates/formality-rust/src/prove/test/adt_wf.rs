@@ -1,4 +1,4 @@
-use crate::grammar::{Parameter, Relation, Wcs};
+use crate::grammar::{Parameter, Predicate, Wcs};
 use crate::rust::term;
 use expect_test::expect;
 use formality_core::test;
@@ -25,7 +25,7 @@ fn well_formed_adt() {
         decls(),
         Env::default(),
         assumptions,
-        Relation::WellFormed(goal),
+        Predicate::WellFormed(goal),
     );
     constraints.assert_ok(
     expect!["{Constraints { env: Env { variables: [], bias: Soundness, pending: [], allow_pending_outlives: false }, known_true: true, substitution: {} }}"]);
@@ -39,7 +39,7 @@ fn not_well_formed_adt() {
         decls(),
         Env::default(),
         assumptions,
-        Relation::WellFormed(goal),
+        Predicate::WellFormed(goal),
     )
     .assert_err(expect![[r#"
         crates/formality-rust/src/prove/prove_via.rs:8:1: no applicable rules for prove_via { goal: u64 = u32, via: Foo(u64), assumptions: {Foo(u64)}, env: Env { variables: [], bias: Soundness, pending: [], allow_pending_outlives: false } }

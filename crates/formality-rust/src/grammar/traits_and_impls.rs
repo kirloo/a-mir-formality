@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
+use crate::grammar::Fn;
 use crate::grammar::{
     AliasTy, AssociatedItemId, Binder, Const, Fallible, Lt, Parameter, ParameterKind, Predicate,
     TraitId, TraitRef, Ty, Wc, Wcs,
 };
-use crate::grammar::{Fn, Relation};
 use crate::prove::Safety;
 use crate::rust::Term;
 use formality_core::{term, Upcast};
@@ -166,11 +166,11 @@ impl WhereClause {
                 Predicate::well_formed_trait_ref(trait_id.with(self_ty, parameters)).upcast()
             }
             WhereClause::AliasEq(alias_ty, ty) => {
-                [Relation::well_formed(alias_ty), Relation::well_formed(ty)]
+                [Predicate::well_formed(alias_ty), Predicate::well_formed(ty)]
                     .into_iter()
                     .collect()
             }
-            WhereClause::Outlives(a, b) => [Relation::well_formed(a), Relation::well_formed(b)]
+            WhereClause::Outlives(a, b) => [Predicate::well_formed(a), Predicate::well_formed(b)]
                 .into_iter()
                 .collect(),
             WhereClause::ForAll(binder) => {
@@ -181,7 +181,7 @@ impl WhereClause {
                     .collect()
             }
             WhereClause::TypeOfConst(ct, ty) => {
-                [Relation::well_formed(ct), Relation::well_formed(ty)]
+                [Predicate::well_formed(ct), Predicate::well_formed(ty)]
                     .into_iter()
                     .collect()
             }

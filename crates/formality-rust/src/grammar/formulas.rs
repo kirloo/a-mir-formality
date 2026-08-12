@@ -14,8 +14,25 @@ pub type Fallible<T> = anyhow::Result<T>;
 
 /// Atomic predicates are the base goals we can try to prove; the rules for proving them
 /// are derived (at least in part) based on the Rust source declarations.
+///
+/// The first few variants are *relations*: built-in goals implemented in custom Rust
+/// logic rather than derived from declarations. They are matched more strictly than the
+/// other predicates (see the `relation-axiom` rule in `prove_via`), so they can be told
+/// apart with [`Skeleton::is_relation`][].
 #[term]
 pub enum Predicate {
+    #[grammar($v0 = $v1)]
+    Equals(Parameter, Parameter),
+
+    #[grammar($v0 <: $v1)]
+    Sub(Parameter, Parameter),
+
+    #[grammar($v0 : $v1)]
+    Outlives(Parameter, Parameter),
+
+    #[grammar(@wf($v0))]
+    WellFormed(Parameter),
+
     /// True if a trait is fully implemented (along with all its where clauses).
     #[cast]
     IsImplemented(TraitRef),
@@ -77,7 +94,23 @@ pub enum Skeleton {
     Equals,
     Sub,
     Outlives,
-    IsInt,
+}
+
+impl Skeleton {
+    /// True if this skeleton belongs to a *relation*, i.e. one of the built-in goals
+    /// implemented in custom Rust logic. Relations require their parameters to match
+    /// exactly, whereas other predicates only require them to be provably equal.
+    pub fn is_relation(&self) -> bool {
+        match self {
+            Skeleton::Equals | Skeleton::Sub | Skeleton::Outlives | Skeleton::WellFormed => true,
+            Skeleton::IsImplemented(_)
+            | Skeleton::NotImplemented(_)
+            | Skeleton::AliasEq(_)
+            | Skeleton::WellFormedTraitRef(_)
+            | Skeleton::IsLocal(_)
+            | Skeleton::ConstHasType => false,
+        }
+    }
 }
 
 impl Predicate {
@@ -86,6 +119,10 @@ impl Predicate {
     #[tracing::instrument(level = "trace", ret)]
     pub fn debone(&self) -> (Skeleton, Vec<Parameter>) {
         match self {
+            Predicate::Equals(a, b) => (Skeleton::Equals, vec![a.clone(), b.clone()]),
+            Predicate::Sub(a, b) => (Skeleton::Sub, vec![a.clone(), b.clone()]),
+            Predicate::Outlives(a, b) => (Skeleton::Outlives, vec![a.clone(), b.clone()]),
+            Predicate::WellFormed(p) => (Skeleton::WellFormed, vec![p.clone()]),
             Predicate::IsImplemented(TraitRef {
                 trait_id,
                 parameters,
@@ -124,34 +161,6 @@ impl Predicate {
     }
 }
 
-/// Relations are built-in goals which are implemented in custom Rust logic.
-#[term]
-pub enum Relation {
-    #[grammar($v0 = $v1)]
-    Equals(Parameter, Parameter),
-
-    #[grammar($v0 <: $v1)]
-    Sub(Parameter, Parameter),
-
-    #[grammar($v0 : $v1)]
-    Outlives(Parameter, Parameter),
-
-    #[grammar(@wf($v0))]
-    WellFormed(Parameter),
-}
-
-impl Relation {
-    #[tracing::instrument(level = "trace", ret)]
-    pub fn debone(&self) -> (Skeleton, Vec<Parameter>) {
-        match self {
-            Relation::Equals(a, b) => (Skeleton::Equals, vec![a.clone(), b.clone()]),
-            Relation::Sub(a, b) => (Skeleton::Sub, vec![a.clone(), b.clone()]),
-            Relation::Outlives(a, b) => (Skeleton::Outlives, vec![a.clone(), b.clone()]),
-            Relation::WellFormed(p) => (Skeleton::WellFormed, vec![p.clone()]),
-        }
-    }
-}
-
 #[term($trait_id ( $,parameters ))]
 pub struct TraitRef {
     pub trait_id: TraitId,
@@ -173,20 +182,3 @@ impl TraitId {
         self.with(self_ty, Vec::<Parameter>::new())
     }
 }
-
-pub trait Debone {
-    fn debone(&self) -> (Skeleton, Vec<Parameter>);
-}
-
-macro_rules! debone_impl {
-    ($t:ty) => {
-        impl Debone for $t {
-            fn debone(&self) -> (Skeleton, Vec<Parameter>) {
-                self.debone()
-            }
-        }
-    };
-}
-
-debone_impl!(Predicate);
-debone_impl!(Relation);

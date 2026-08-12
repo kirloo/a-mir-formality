@@ -7,7 +7,7 @@
 //! * [`prove`][] -- prove a set of where-clauses to be true
 //! * [`prove_normalize`][] -- normalize a type one step (typically used in a recursive setup)
 
-use crate::grammar::{Binder, Crates, Predicate, Relation, Ty, Wc, Wcs, WhereBound, WhereClause};
+use crate::grammar::{Binder, Crates, Predicate, Ty, Wc, Wcs, WhereBound, WhereClause};
 use crate::rust::FormalityLang;
 use formality_core::judgment::{EachProof, FailedRule, FailureLocation, ProofTree};
 use formality_core::visit::CoreVisit;
@@ -157,7 +157,6 @@ upcast_to_wcs! {
     Wc,
     Wcs,
     Predicate,
-    Relation,
 }
 
 impl ToWcs for () {
@@ -215,7 +214,7 @@ impl ToWcs for WhereClause {
             WhereClause::AliasEq(alias_ty, ty) => {
                 Predicate::AliasEq(alias_ty.clone(), ty.clone()).upcast()
             }
-            WhereClause::Outlives(a, b) => Relation::outlives(a, b).upcast(),
+            WhereClause::Outlives(a, b) => Predicate::outlives(a, b).upcast(),
             WhereClause::ForAll(binder) => {
                 let (vars, wc) = binder.open();
                 wc.to_wcs()
@@ -238,7 +237,7 @@ impl WhereBound {
             WhereBound::IsImplemented(trait_id, parameters) => {
                 trait_id.with(self_ty, parameters).upcast()
             }
-            WhereBound::Outlives(lt) => Relation::outlives(self_ty, lt).upcast(),
+            WhereBound::Outlives(lt) => Predicate::outlives(self_ty, lt).upcast(),
             WhereBound::ForAll(binder) => {
                 let (vars, bound) = binder.open();
                 Wc::for_all(Binder::new(&vars, bound.to_wc(self_ty)))

@@ -1,8 +1,8 @@
 use crate::grammar::{
     AdtId, AliasName, AliasTy, AssociatedTyValue, AssociatedTyValueBoundData, Binder, Crate,
     CrateId, CrateItem, Crates, ImplItem, NegTraitImpl, NegTraitImplBoundData, Parameter,
-    Predicate, Relation, Trait, TraitBoundData, TraitId, TraitImpl, TraitImplBoundData, TraitRef,
-    Ty, Wc, Wcs,
+    Predicate, Trait, TraitBoundData, TraitId, TraitImpl, TraitImplBoundData, TraitRef, Ty, Wc,
+    Wcs,
 };
 use crate::prove::ToWcs;
 use formality_core::{seq, Downcasted, Set, To, Upcast, Upcasted};
@@ -342,9 +342,8 @@ impl TraitDecl {
                 Wc::Predicate(Predicate::IsImplemented(trait_ref)) => {
                     trait_ref.parameters[0] == *self_var
                 }
-                Wc::Relation(Relation::Outlives(a, _)) => *a == *self_var,
+                Wc::Predicate(Predicate::Outlives(a, _)) => *a == *self_var,
                 Wc::Predicate(_) => false,
-                Wc::Relation(_) => false,
                 Wc::ForAll(binder) => is_supertrait(self_var, binder.peek()),
                 Wc::Implies(_, c) => is_supertrait(self_var, c),
             }

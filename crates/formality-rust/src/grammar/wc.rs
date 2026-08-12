@@ -6,7 +6,7 @@ use formality_core::{
 
 use crate::{grammar::WhereClause, prove::ToWcs};
 
-use super::{Binder, Parameter, Predicate, Relation, TraitRef};
+use super::{Binder, Parameter, Predicate, TraitRef};
 
 #[term($set)]
 #[derive(Default)]
@@ -26,7 +26,7 @@ impl Wcs {
         assert_eq!(a.len(), b.len());
         a.into_iter()
             .zip(b)
-            .map(|(a, b)| Relation::equals(a, b))
+            .map(|(a, b)| Predicate::equals(a, b))
             .collect()
     }
 
@@ -39,7 +39,7 @@ impl Wcs {
         assert_eq!(a.len(), b.len());
         a.into_iter()
             .zip(b)
-            .map(|(a, b)| Relation::sub(a, b))
+            .map(|(a, b)| Predicate::sub(a, b))
             .collect()
     }
 
@@ -47,7 +47,7 @@ impl Wcs {
     pub fn all_outlives(a: impl Upcast<Vec<Parameter>>, b: impl Upcast<Parameter>) -> Wcs {
         let a: Vec<Parameter> = a.upcast();
         let b: Parameter = b.upcast();
-        a.into_iter().map(|a| Relation::outlives(a, &b)).collect()
+        a.into_iter().map(|a| Predicate::outlives(a, &b)).collect()
     }
 
     /// Iterate over where-clauses
@@ -147,10 +147,6 @@ impl DowncastTo<()> for Wcs {
 
 #[term]
 pub enum Wc {
-    /// Means the built-in relation holds.
-    #[cast]
-    Relation(Relation),
-
     /// Means the predicate holds.
     #[cast]
     Predicate(Predicate),
@@ -184,6 +180,5 @@ impl DowncastTo<Wc> for Wcs {
     }
 }
 
-cast_impl!((Relation) <: (Wc) <: (Wcs));
 cast_impl!((Predicate) <: (Wc) <: (Wcs));
 cast_impl!((TraitRef) <: (Wc) <: (Wcs));
