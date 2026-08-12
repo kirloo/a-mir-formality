@@ -425,3 +425,14 @@ fn impl_with_default_fn_body_ok() {
     .skip_execute()
     .ok();
 }
+
+#[test]
+fn nonexistant_trait() {
+    FormalityTest::new(crates![crate core {
+        struct S {}
+        impl !Nonexistent for S {}
+    }])
+    .err(expect_test::expect![[r#"
+        the rule "check_neg_trait_impl" at (impls.rs) failed because
+          no trait named `Nonexistent`"#]]);
+}
