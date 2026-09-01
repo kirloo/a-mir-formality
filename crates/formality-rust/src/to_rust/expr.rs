@@ -158,6 +158,9 @@ pub fn lower_expr(ctx: &mut Context, expr: &Expr) -> Fallible<syntax::Expr> {
                 fields: syntax::StructExprFields::Tuple(tuple_fields),
             })
         }
+        Expr::BinOp { .. } => {
+            todo!()
+        }
     }
 }
 

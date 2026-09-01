@@ -1,8 +1,9 @@
 use crate::{
-    check::borrow_check::env::TypeckEnv,
-    check::borrow_check::flow_state::FlowState,
-    grammar::expr::{Block, Expr, FieldExpr, Init, Label, LabelId, PlaceExpr, Stmt},
-    grammar::ValueId,
+    check::borrow_check::{env::TypeckEnv, flow_state::FlowState},
+    grammar::{
+        expr::{Block, Expr, FieldExpr, Init, Label, LabelId, PlaceExpr, Stmt},
+        ValueId,
+    },
 };
 use formality_core::{Set, Upcast};
 
@@ -394,6 +395,8 @@ impl LiveBefore for Expr {
                 let place_expr: PlaceExpr = id.upcast();
                 place_expr.live_before(env, scopes, places_live)
             }
+
+            Expr::BinOp { .. } => places_live,
         }
     }
 }

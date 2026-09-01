@@ -143,6 +143,90 @@ pub enum Stmt {
 }
 
 #[term]
+pub enum BinOpKind {
+    #[grammar(*)]
+    Mul,
+    #[grammar(/)]
+    Div,
+    #[grammar(%)]
+    Mod,
+
+    #[grammar(+)]
+    Add,
+    #[grammar(-)]
+    Sub,
+
+    #[grammar(<<)]
+    BitLeftShift,
+    #[grammar(>>)]
+    BitRightShift,
+
+    #[grammar(&)]
+    BitAnd,
+
+    #[grammar(^)]
+    BitXor,
+
+    #[grammar(|)]
+    BitOr,
+
+    #[grammar(==)]
+    Eq,
+    #[grammar(!=)]
+    Ne,
+    #[grammar(<)]
+    Lt,
+    #[grammar(>)]
+    Gt,
+    #[grammar(<=)]
+    Lte,
+    #[grammar(>=)]
+    Gte,
+
+    #[grammar(&&)]
+    And,
+
+    #[grammar(||)]
+    Or,
+
+    #[grammar(..)]
+    Range,
+    #[grammar(..=)]
+    InclRange,
+
+    #[grammar(+=)]
+    AddAssign,
+    #[grammar(-=)]
+    SubAssign,
+    #[grammar(*=)]
+    MulAssign,
+    #[grammar(/=)]
+    DivAssign,
+    #[grammar(%=)]
+    ModAssign,
+    #[grammar(&=)]
+    BitAndAssign,
+    #[grammar(|=)]
+    BitOrAssign,
+    #[grammar(^=)]
+    BitXorAssign,
+    #[grammar(<<=)]
+    BitLeftShiftAssign,
+    #[grammar(>>=)]
+    BitRightShiftAssign,
+}
+
+#[term($lhs $op $rhs)]
+#[customize(parse, debug)]
+pub struct BinOpExpr {
+    lhs : Arc<Expr>,
+    op : BinOpKind,
+    rhs : Arc<Expr>,
+}
+
+
+
+#[term]
 pub enum Expr {
     /// `place = expr`
     ///
@@ -194,6 +278,14 @@ pub enum Expr {
         field_exprs: Vec<FieldExpr>,
         adt_id: AdtId,
         turbofish: Turbofish,
+    },
+
+    #[grammar($lhs $op $rhs)]
+    #[customize(parse)]
+    BinOp {
+        lhs: Arc<Expr>,
+        op: BinOpKind,
+        rhs: Arc<Expr>,
     },
 }
 
@@ -286,3 +378,4 @@ pub enum FnName {
         id: ValueId,
     },
 }
+
